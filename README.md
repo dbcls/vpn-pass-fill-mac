@@ -23,7 +23,7 @@ python forti_pass_fill.py > ./status.log 2>&1 &
 * メニューバーの足跡アイコンからパスワードを OS ののキーチェーンに保存
 * メニューバーの FortiClient アイコンから "Connect to hoge" でつなげた時のみ対応
 * LaunchAgent で起動時常駐化とかは自分で調べてやってください
-  * Agent にしたたアクセシビリティ許可は Terminal じゃなくて Python かも
+  * Agent にしたらアクセシビリティ許可は Terminal じゃなくて Python かも
 * 常時監視してるのでその分のリソースは食います
   * 監視回数変えたかったらコード書き換えてください (コードは0.4秒毎)
 
