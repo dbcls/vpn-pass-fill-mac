@@ -20,8 +20,8 @@ nohup python forti_pass_fill.py > ./status.log 2>&1 &
 
 ## トークンも自動化（Apple mail 版）
 * forti_pass_fill_applemail.py
-* 受信設定済みの Apple mail アプリを起動しておく
-* メニューバーのアイコンから NIG のメールアカウント名指定
+* トークンを受け取るメールアカウント設定済みの Apple mail アプリを起動しておく
+* メニューバーのアイコンからメールアカウント名を指定
 * メール受信を待つので時間がかかる場合もあります
 
 ## トークンも自動化（ブラウザの Gmail 版）
