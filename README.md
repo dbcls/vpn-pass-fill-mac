@@ -18,7 +18,7 @@ pip install rumps pyobjc
 nohup python forti_pass_fill.py > ./status.log 2>&1 &
 ```
 
-* メニューバーの足跡アイコンからパスワードをキーチェーンに保存
+* メニューバーの足跡アイコンからパスワードを OS ののキーチェーンに保存
 * メニューバーの FortiClient アイコンから "Connect to hoge" でつなげた時のみ対応
 * LaunchAgent で起動時常駐化とかは自分で調べてやってください
   * Agent にしたら Terminal のアクセシビリティは要らないかも
@@ -34,7 +34,7 @@ nohup python forti_pass_fill.py > ./status.log 2>&1 &
 * forti_pass_fill_applemail.py
 * トークンを受け取るメールアカウント設定済みの Apple mail アプリを起動しておく
   * OS 側で Mail アプリのアクセシビリティの許可が必要
-* メニューバーのアイコンからメールアカウント名を指定
+* メニューバーのアイコンからメールアカウント名を指定保存
 * メール受信を待つので時間がかかる場合もあります
 
 ## トークンも自動化（ブラウザの Gmail 版）
