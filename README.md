@@ -15,7 +15,7 @@ pip install rumps pyobjc
   * OS 側で Terminal アプリのアクセシビリティの許可が必要
 
 ```
-nohup python forti_pass_fill.py > ./status.log 2>&1 &
+python forti_pass_fill.py > ./status.log 2>&1 &
 ```
 
 * メニューバーの足跡アイコンからパスワードを OS ののキーチェーンに保存
