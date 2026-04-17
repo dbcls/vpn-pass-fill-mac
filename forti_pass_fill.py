@@ -47,8 +47,6 @@ PASSWORD_COOLDOWN_SEC = 8.0
 OWNERS = {
     "FortiClientAgent",
     "FortiTray",
-    "coreautha",
-    "LocalAuthenticationRemoteService",
 }
 
 
