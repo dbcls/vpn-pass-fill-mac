@@ -4,13 +4,20 @@ AI で適当に作ったので自己責任で
 
 ## 使い方
 
+* Requirements
+
 ```
 pip install rumps pyobjc
+```
+
+* Terminal でコマンド実行
+  * OS 側で Terminal アプリのアクセシビリティの許可が必要
+
+```
 nohup python forti_pass_fill.py > ./status.log 2>&1 &
 ```
 
 * メニューバーの足跡アイコンからパスワードをキーチェーンに保存
-  * OS 側で Terminal アプリのアクセシビリティの許可が必要
 * メニューバーの FortiClient アイコンから "Conect to hoge" でつなげた時のみ対応
 * LaunchAgent で起動時常駐化とかは自分で調べてやってください
   * Agent にしたら Terminal のアクセシビリティは要らないかも
