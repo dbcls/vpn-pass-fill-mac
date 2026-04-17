@@ -10,7 +10,7 @@ AI で適当に作ったので自己責任で
 pip install rumps pyobjc
 ```
 
-* Terminal でコマンド実行
+* Terminal で実行
   * OS 側で Terminal アプリのアクセシビリティの許可が必要
 
 ```
