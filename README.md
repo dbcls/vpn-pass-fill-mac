@@ -12,7 +12,7 @@ pip install rumps pyobjc
 ```
 
 * Terminal で実行
-  * OS 側で Terminal アプリのアクセシビリティの許可が必要
+  * OS 側で Terminal アプリのプライバシーとセキュリティ＞アクセシビリティの許可が必要
 
 ```
 python forti_pass_fill.py > ./status.log 2>&1 &
@@ -33,7 +33,8 @@ python forti_pass_fill.py > ./status.log 2>&1 &
 ## トークンも自動化（Apple mail 版）
 * forti_pass_fill_applemail.py
 * トークンを受け取るメールアカウント設定済みの Apple mail アプリを起動しておく
-  * OS 側で Mail アプリのアクセシビリティの許可が必要
+  * OS 側でアプリのプライバシーとセキュリティ＞オートメーションにおいて "Terminal &gt; Mail" の許可が必要
+    * Agent 化した場合は "Python &gt; Mail"
 * メニューバーのアイコンからメールアカウント名を指定保存
 * メール受信を待つので時間がかかる場合もあります
 * 通知メールのパースは某組織のものに合わせてハードコードされています
