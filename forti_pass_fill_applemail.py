@@ -398,7 +398,7 @@ display dialog "Apple Mail のアカウント名を入力してください。" 
             return
         account = match.group(1).strip()
         if not account:
-            rumps.alert("Account name is empty.")
+            self._alert("Account name is empty.")
             return
         self.mail_account = account
         self.mail_account_item.title = f"Mail Account: {account}"
@@ -410,21 +410,24 @@ display dialog "Apple Mail のアカウント名を入力してください。" 
 
     @rumps.clicked("Set Password")
     def set_password_menu(self, _sender) -> None:
-        window = rumps.Window(
-            message="Forti VPN password を保存または更新します。",
-            title="Set Forti Password",
-            default_text="",
-            ok="Save",
-            cancel="Cancel",
-            secure=True,
-            dimensions=(320, 24),
-        )
-        response = window.run()
-        if not response.clicked:
+        script = '''
+display dialog "Forti VPN password を保存または更新します。" ¬
+    default answer "" ¬
+    with hidden answer ¬
+    with title "Set Forti Password" ¬
+    buttons {"Cancel", "Save"} ¬
+    default button "Save"
+'''
+        try:
+            raw = self.run_osascript(script)
+        except subprocess.CalledProcessError:
             return
-        password = (response.text or "").strip()
+        match = re.search(r"text returned:(.*)", raw)
+        if not match:
+            return
+        password = match.group(1).strip()
         if not password:
-            rumps.alert("Password is empty.")
+            self._alert("Password is empty.")
             return
         try:
             self.set_keychain_password(KEYCHAIN_SERVICE, password)
@@ -432,17 +435,11 @@ display dialog "Apple Mail のアカウント名を入力してください。" 
             self.notify("Forti", "パスワードを保存しました")
         except Exception as e:
             self.log(f"set password error: {e}")
-            rumps.alert(f"保存に失敗しました: {e}")
+            self._alert(f"保存に失敗しました: {e}")
 
     @rumps.clicked("Delete Password")
     def delete_password_menu(self, _sender) -> None:
-        answer = rumps.alert(
-            title="Delete Password",
-            message="保存済みの Forti VPN password を削除しますか？",
-            ok="Delete",
-            cancel="Cancel",
-        )
-        if answer != 1:
+        if not self._confirm("保存済みの Forti VPN password を削除しますか？", "Delete Password", "Delete"):
             return
         try:
             self.delete_keychain_password(KEYCHAIN_SERVICE)
@@ -450,10 +447,10 @@ display dialog "Apple Mail のアカウント名を入力してください。" 
             self.notify("Forti", "保存したパスワードを削除しました")
         except subprocess.CalledProcessError:
             self.log("delete password: no keychain item")
-            rumps.alert("保存済みパスワードが見つかりませんでした。")
+            self._alert("保存済みパスワードが見つかりませんでした。")
         except Exception as e:
             self.log(f"delete password error: {e}")
-            rumps.alert(f"削除に失敗しました: {e}")
+            self._alert(f"削除に失敗しました: {e}")
 
     @rumps.clicked("Test Keychain Read")
     def test_keychain_read(self, _sender) -> None:
@@ -463,11 +460,16 @@ display dialog "Apple Mail のアカウント名を入力してください。" 
             self.notify("Forti", "キーチェーン読み取り成功")
         except Exception as e:
             self.log(f"keychain read error: {e}")
-            rumps.alert(f"読み取りに失敗しました: {e}")
+            self._alert(f"読み取りに失敗しました: {e}")
 
     @rumps.clicked("Show Last Log")
     def show_last_log(self, _sender) -> None:
-        rumps.alert(self.last_status)
+        msg = self.last_status.replace("\\", "\\\\").replace('"', '\\"')
+        script = f'display dialog "{msg}" with title "Last Log" buttons {{"OK"}} default button "OK"'
+        try:
+            self.run_osascript(script)
+        except Exception:
+            pass
 
     @rumps.clicked("Quit")
     def quit_app(self, _sender) -> None:
