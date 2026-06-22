@@ -35,11 +35,16 @@ from Quartz import (
 )
 
 DEFAULT_MAIL_ACCOUNT = "NIG"
-TARGET_SENDER = "vpn-apl@nig.ac.jp"
+# 送信者アドレスは環境で変わりうる（自分宛転送など）ので、デフォルトでは送信者で絞らず
+# 件名の AuthCode パターンで判定する。特定の送信者だけに限定したい場合はここに文字列を入れる。
+TARGET_SENDER = ""
 SUBJECT_PATTERN = re.compile(r"AuthCode:\s*(\d+)")
+# OTP は短命なので、これより古い（受信からの経過秒）メールのコードは使い回しとみなし無視する
+TOKEN_MAX_AGE_SEC = 300
 APP_TITLE = "🐾" # menu bar icon (emoji)
 KEYCHAIN_SERVICE = "FortiVPNAuth"
 CONFIG_PATH = os.path.expanduser("~/.forti_menu_autofill.json")
+LOG_PATH = os.path.expanduser("~/forti_autofill.log")
 WATCH_INTERVAL_SEC = 0.4
 PASSWORD_COOLDOWN_SEC = 8.0
 OWNERS = {
@@ -55,12 +60,14 @@ tell application "Mail"
     set targetAccount to account "{MAIL_ACCOUNT}"
     check for new mail for targetAccount
     delay 5
+    set nowDate to (current date)
     set mb to mailbox "INBOX" of targetAccount
     set msgs to (messages of mb whose read status is false)
     repeat with m in msgs
         set sndr to sender of m
         set sub to subject of m
-        set output to output & sndr & sep & sub & rowsep
+        set ago to (nowDate - (date received of m))
+        set output to output & sndr & sep & sub & sep & ago & rowsep
     end repeat
     return output
 end tell
@@ -115,6 +122,11 @@ class FortiMenuApp(rumps.App):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_status = f"[{ts}] {msg}"
         print(self.last_status, flush=True)
+        try:
+            with open(LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(self.last_status + "\n")
+        except Exception:
+            pass
         self.status_item.title = f"Status: {msg[:80]}"
 
     def update_status(self, text: str) -> None:
@@ -174,27 +186,59 @@ class FortiMenuApp(rumps.App):
             text=True,
         )
         if result.returncode != 0:
-            self.log(f"AppleScript 実行失敗:\n{result.stderr}")
+            err = (result.stderr or "").strip()
+            self.log(f"AppleScript 実行失敗: {err}")
+            low = err.lower()
+            if "-1743" in err or "not authorized" in low or "permission" in low:
+                self.notify(
+                    "Forti",
+                    "Mail へのオートメーション許可が無効です。"
+                    "システム設定>プライバシーとセキュリティ>オートメーションで Terminal(Python)>Mail を許可してください",
+                )
             return ""
 
         raw = result.stdout.strip()
         if not raw:
+            self.log("mail: 未読メールが見つかりませんでした")
             return ""
 
+        # 未読メールの中から AuthCode を含むものを集め、最も新しい（受信からの経過が短い）
+        # コードを採用する。古い使い回しコードは TOKEN_MAX_AGE_SEC で弾く。
+        best_code: Optional[str] = None
+        best_ago = float("inf")
         for row in raw.split("^^^"):
             row = row.strip()
             if not row:
                 continue
-            parts = row.split("|||", 1)
-            if len(parts) == 2:
-                sender = parts[0].strip()
-                subject = parts[1].strip()
-                if TARGET_SENDER in sender:
-                    m = SUBJECT_PATTERN.search(subject)
-                    if m:
-                        return m.group(1)
+            parts = row.split("|||")
+            if len(parts) < 2:
+                continue
+            sender = parts[0].strip()
+            subject = parts[1].strip()
+            try:
+                ago = float(parts[2].strip()) if len(parts) >= 3 and parts[2].strip() else 0.0
+            except ValueError:
+                ago = 0.0
 
-        return ""
+            # 送信者で絞りたい場合のみ（TARGET_SENDER が空なら絞らない）
+            if TARGET_SENDER and TARGET_SENDER not in sender:
+                continue
+
+            m = SUBJECT_PATTERN.search(subject)
+            if not m:
+                continue
+            if ago > TOKEN_MAX_AGE_SEC:
+                self.log(f"mail: 古いコードを無視 (ago={int(ago)}s): {subject!r}")
+                continue
+            if ago < best_ago:
+                best_ago = ago
+                best_code = m.group(1)
+
+        if best_code is None:
+            self.log("mail: 有効な AuthCode メールが見つかりませんでした")
+            return ""
+        self.log(f"mail: token 取得 (ago={int(best_ago)}s)")
+        return best_code
 
     # ---------- Window watch ----------
     def list_candidate_windows(self) -> list[dict]:
@@ -283,6 +327,11 @@ on run
             if not (exists window 1) then
                 return "no-window"
             end if
+            -- Mission Control に頼らず、対象ウィンドウを明示的に前面へ
+            try
+                perform action "AXRaise" of window 1
+                delay 0.2
+            end try
             try
                 set value of (text field 1 of window 1) to theWord
                 key code 36
@@ -355,6 +404,10 @@ end run
 
             if not fill_word:
                 self.log(f"fill_word is empty, skipping: word={type!r}")
+                if type == "token":
+                    self.notify("Forti", "メールからトークンを取得できませんでした（メール未着 or 許可不足）")
+                # 取得失敗時も少し待ってから再試行する（0.4秒毎の通知/メール問い合わせ連打を防ぐ）
+                self.last_password_handled[wid] = now
                 return
 
             self.log(f"target detected: owner={owner!r} name={name!r} id={wid}")
