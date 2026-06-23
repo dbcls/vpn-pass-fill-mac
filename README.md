@@ -55,8 +55,8 @@ python forti_pass_fill.py > ./status.log 2>&1 &
   * "Set IMAP Password" … メールボックスのパスワード（2段階認証環境では**アプリパスワード**）を OS キーチェーンに保存
   * "Test IMAP Login" … 接続確認（まずこれで成功するか確かめる）
 * **Gmail / Google Workspace の場合のパスワード設定（アプリパスワード）**
-  1. Google アカウントの**2段階認証プロセスを有効化**しておく（未設定だとアプリパスワードを作れない）
-  2. https://myaccount.google.com/apppasswords を開く
+  1. 対象の Google アカウントの**2段階認証プロセスを有効化**しておく（未設定だとアプリパスワードを作れない）
+  2. https://myaccount.google.com/apppasswords を対象のアカウントで開く
      * 項目が出てこない／エラーになる場合は、管理者がアプリパスワードを封鎖済み＝この方式は使えない（Apple Mail 版を使う）
   3. 適当なアプリ名（例: `forti`）を入力して生成 → 表示される**16桁のパスワード**（空白は詰めてよい）をコピー
   4. 🐾メニューの "Set IMAP Password" にそれを貼り付けて保存
