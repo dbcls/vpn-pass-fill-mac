@@ -44,7 +44,6 @@ TOKEN_MAX_AGE_SEC = 300
 APP_TITLE = "🐾" # menu bar icon (emoji)
 KEYCHAIN_SERVICE = "FortiVPNAuth"
 CONFIG_PATH = os.path.expanduser("~/.forti_menu_autofill.json")
-LOG_PATH = os.path.expanduser("~/forti_autofill.log")
 WATCH_INTERVAL_SEC = 0.4
 PASSWORD_COOLDOWN_SEC = 8.0
 OWNERS = {
@@ -122,11 +121,6 @@ class FortiMenuApp(rumps.App):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_status = f"[{ts}] {msg}"
         print(self.last_status, flush=True)
-        try:
-            with open(LOG_PATH, "a", encoding="utf-8") as f:
-                f.write(self.last_status + "\n")
-        except Exception:
-            pass
         self.status_item.title = f"Status: {msg[:80]}"
 
     def update_status(self, text: str) -> None:
