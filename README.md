@@ -50,7 +50,7 @@ python forti_pass_fill.py > ./status.log 2>&1 &
 * **Apple Mail を使っていない人向け**。Apple Mail も AppleScript のオートメーション許可も使わず、`imaplib` でメールサーバへ直接つないでトークンを取得する
   * メールアプリの起動・設定が一切不要。ツールに IMAP アカウントを設定するだけ
 * 追加の pip インストールは不要（`imaplib` / `email` は標準ライブラリ）
-* メニューバーの🐾アイコンから設定
+* メニューバーの🐾アイコンから設定 (Gmail の例は後述)
   * "Set IMAP Account" … ホスト名 / ポート(通常 993) / ユーザー名 / フォルダ(通常 INBOX)
   * "Set IMAP Password" … メールボックスのパスワード（2段階認証環境では**アプリパスワード**）を OS キーチェーンに保存
   * "Test IMAP Login" … 接続確認（まずこれで成功するか確かめる）
